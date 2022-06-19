@@ -140,7 +140,7 @@ impl EditorHelper {
           generate_preview: None,
           user_gesture: None,
           await_promise: None,
-          throw_on_side_effect: Some(true),
+          throw_on_side_effect: None,
           timeout: Some(200),
           disable_breaks: None,
           repl_mode: None,
