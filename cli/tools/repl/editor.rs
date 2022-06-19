@@ -62,7 +62,6 @@ impl EditorHelper {
 
     // otherwise fall back to the prototype
     let expr_type = self.get_expression_type(expr);
-    println!("{expr_type:?}");
     let object_expr = match expr_type.as_deref() {
       // possibilities: https://chromedevtools.github.io/devtools-protocol/v8/Runtime/#type-RemoteObject
       Some("object") => "Object.prototype",
@@ -71,13 +70,8 @@ impl EditorHelper {
       Some("boolean") => "Boolean.prototype",
       Some("bigint") => "BigInt.prototype",
       Some("number") => "Number.prototype",
-      x @ _ => {
-          println!("unhandled {:?}", x);
-          return Vec::new(); // undefined, symbol, and unhandled
-      },
+      _ => return Vec::new(), // undefined, symbol, and unhandled
     };
-
-    println!("{expr_type:?} {object_expr}");
 
     self
       .get_object_expr_properties(object_expr)
@@ -120,7 +114,6 @@ impl EditorHelper {
   }
 
   fn evaluate_expression(&self, expr: &str) -> Option<cdp::EvaluateResponse> {
-    println!("evaluate_expression: {expr:?}");
     let evaluate_response = self
       .sync_sender
       .post_message(
@@ -135,7 +128,7 @@ impl EditorHelper {
           generate_preview: None,
           user_gesture: None,
           await_promise: None,
-          throw_on_side_effect: None,
+          throw_on_side_effect: Some(true),
           timeout: Some(200),
           disable_breaks: None,
           repl_mode: None,
@@ -144,17 +137,12 @@ impl EditorHelper {
         }),
       )
       .ok()?;
-    println!("evaluate_expression: {expr:?}1");
-    println!("evaluate_expression response: {evaluate_response:?}1");
     let evaluate_response: cdp::EvaluateResponse =
       serde_json::from_value(evaluate_response).ok()?;
 
-    println!("evaluate_expression: {expr:?}2");
     if evaluate_response.exception_details.is_some() {
-    println!("evaluate_expression: {expr:?}3");
       None
     } else {
-    println!("evaluate_expression: {expr:?}4");
       Some(evaluate_response)
     }
   }
@@ -183,7 +171,6 @@ fn get_expr_from_line_at_pos(line: &str, cursor_pos: usize) -> &str {
   word
 }
 
-// change it
 impl Completer for EditorHelper {
   type Candidate = String;
 
@@ -193,18 +180,14 @@ impl Completer for EditorHelper {
     pos: usize,
     _ctx: &Context<'_>,
   ) -> Result<(usize, Vec<String>), ReadlineError> {
-    println!("\ncalled complete(line: {}, pos: {})", line, pos);
     let lsp_completions = self.sync_sender.lsp_completions(line, pos);
     if !lsp_completions.is_empty() {
       // assumes all lsp completions have the same start position
-      println!("has lsp completion");
       return Ok((
         lsp_completions[0].range.start,
         lsp_completions.into_iter().map(|c| c.new_text).collect(),
       ));
     }
-
-    println!("no lsp completion");
 
     let expr = get_expr_from_line_at_pos(line, pos);
 
@@ -212,21 +195,14 @@ impl Completer for EditorHelper {
     if let Some(index) = expr.rfind('.') {
       let sub_expr = &expr[..index];
       let prop_name = &expr[index + 1..];
-      let candidates: Vec<_> = self
+      let candidates = self
         .get_expression_property_names(sub_expr)
         .into_iter()
-        .map(|n| { println!("{}", n); n } )
         .filter(|n| !n.starts_with("Symbol(") && n.starts_with(prop_name))
         .collect();
 
-      println!("matches obj.prop, candidates: {}", candidates.len());
-      println!("expr: {}", expr);
-      println!("sub_expr: {}", sub_expr);
-      println!("prop_name: {}", prop_name);
-
       Ok((pos - prop_name.len(), candidates))
     } else {
-      println!("not obj.prop");
       // combine results of declarations and globalThis properties
       let mut candidates = self
         .get_expression_property_names("globalThis")
