@@ -20,7 +20,7 @@ use std::process::Command;
 static ARCHIVE_NAME: Lazy<String> =
   Lazy::new(|| format!("deno-{}.zip", env!("TARGET")));
 
-const RELEASE_URL: &str = "https://github.com/denoland/deno/releases";
+const RELEASE_URL: &str = "https://github.com/btwiuse/subshell/releases";
 
 pub async fn upgrade(upgrade_flags: UpgradeFlags) -> Result<(), AnyError> {
   let old_exe_path = std::env::current_exe()?;
