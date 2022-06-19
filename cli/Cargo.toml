@@ -1,17 +1,17 @@
 # Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 [package]
-name = "deno"
-version = "1.23.0"
-authors = ["the Deno authors"]
-default-run = "deno"
+name = "subshell"
+version = "0.1.1"
+authors = ["the Deno authors", "btwiuse"]
+default-run = "subshell"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/denoland/deno"
-description = "Provides the deno executable"
+repository = "https://github.com/btwiuse/subshell"
+description = "Substrate shell"
 
 [[bin]]
-name = "deno"
+name = "subshell"
 path = "main.rs"
 
 [[bench]]
