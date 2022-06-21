@@ -117,7 +117,7 @@ pub async fn run(
     }
   }
 
-  println!("Deno {}", crate::version::deno());
+  println!("Subshell {}", crate::version::deno());
   println!("exit using ctrl+d or close()");
 
   loop {
