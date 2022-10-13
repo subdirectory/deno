@@ -162,7 +162,7 @@ pub async fn run(flags: Flags, repl_flags: ReplFlags) -> Result<i32, AnyError> {
   // Doing this manually, instead of using `log::info!` because these messages
   // are supposed to go to stdout, not stderr.
   if !cli_options.is_quiet() {
-    println!("Deno {}", crate::version::deno());
+    println!("Subshell {}", std::env::var("SUBSHELL_VERSION").unwrap_or(crate::version::deno().to_string()));
     println!("exit using ctrl+d, ctrl+c, or close()");
     if repl_flags.is_default_command {
       println!(
