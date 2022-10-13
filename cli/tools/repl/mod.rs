@@ -118,7 +118,7 @@ pub async fn run(
     }
   }
 
-  println!("Subshell {}", "0.2.9");
+  println!("Subshell {}", std::env::var("SUBSHELL_VERSION").unwrap_or(crate::version::deno()));
   println!("exit using ctrl+d, ctrl+c, or close()");
 
   loop {
