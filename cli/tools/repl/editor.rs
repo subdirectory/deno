@@ -475,7 +475,7 @@ impl ReplEditor {
   }
 
   pub fn readline(&self) -> Result<String, ReadlineError> {
-    self.inner.lock().readline("> ")
+    self.inner.lock().readline("❯ ")
   }
 
   pub fn update_history(&self, entry: String) {
