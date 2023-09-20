@@ -66,8 +66,8 @@ impl Repl {
           if self.editor.should_exit_on_interrupt() {
             break;
           }
-          self.editor.set_should_exit_on_interrupt(true);
-          println!("press ctrl+c again to exit");
+          self.editor.set_should_exit_on_interrupt(false);
+          println!("press ctrl+d to exit");
           continue;
         }
         Err(ReadlineError::Eof) => {
