@@ -198,8 +198,8 @@ pub async fn run(flags: Flags, repl_flags: ReplFlags) -> Result<i32, AnyError> {
         if editor.should_exit_on_interrupt() {
           break;
         }
-        editor.set_should_exit_on_interrupt(true);
-        println!("press ctrl+c again to exit");
+        editor.set_should_exit_on_interrupt(false);
+        println!("press ctrl+d to exit");
         continue;
       }
       Err(ReadlineError::Eof) => {
