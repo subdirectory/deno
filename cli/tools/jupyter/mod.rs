@@ -60,6 +60,7 @@ pub async fn kernel(
   let resolver = factory.resolver().await?.clone();
   let worker_factory = factory.create_cli_main_worker_factory().await?;
   let (stdio_tx, stdio_rx) = mpsc::unbounded();
+  let file_fetcher = factory.file_fetcher()?;
 
   let conn_file =
     std::fs::read_to_string(&connection_filepath).with_context(|| {
@@ -83,10 +84,37 @@ pub async fn kernel(
     .await?;
   worker.setup_repl().await?;
   let worker = worker.into_main_worker();
-  let repl_session =
+  let mut repl_session =
     repl::ReplSession::initialize(cli_options, npm_resolver, resolver, worker)
       .await?;
 
+  if let Some(eval_files) = jupyter_flags.eval_files {
+    for eval_file in eval_files {
+      match repl::read_eval_file(cli_options, file_fetcher, &eval_file).await {
+        Ok(eval_source) => {
+          let output = repl_session
+            .evaluate_line_and_get_output(&eval_source)
+            .await;
+          // only output errors
+          if let repl::EvaluationOutput::Error(error_text) = output {
+            println!("Error in --eval-file file \"{eval_file}\": {error_text}");
+          }
+        }
+        Err(e) => {
+          println!("Error in --eval-file file \"{eval_file}\": {e}");
+        }
+      }
+    }
+  }
+
+  if let Some(eval) = jupyter_flags.eval {
+    let output = repl_session.evaluate_line_and_get_output(&eval).await;
+    // only output errors
+    if let repl::EvaluationOutput::Error(error_text) = output {
+      println!("Error in --eval flag: {error_text}");
+    }
+  }
+    
   server::JupyterServer::start(spec, stdio_rx, repl_session).await?;
 
   Ok(())

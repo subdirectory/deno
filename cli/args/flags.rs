@@ -163,6 +163,8 @@ pub struct JupyterFlags {
   pub install: bool,
   pub kernel: bool,
   pub conn_file: Option<PathBuf>,
+  pub eval_files: Option<Vec<String>>,
+  pub eval: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1648,6 +1650,21 @@ fn jupyter_subcommand() -> Command {
         .value_parser(value_parser!(PathBuf))
         .value_hint(ValueHint::FilePath)
         .conflicts_with("install"))
+    .arg(
+      Arg::new("eval-file")
+        .long("eval-file")
+        .num_args(1..)
+        .use_value_delimiter(true)
+        .require_equals(true)
+        .help("Evaluates the provided file(s) as scripts when the REPL starts. Accepts file paths and URLs.")
+        .value_hint(ValueHint::AnyPath),
+    )
+    .arg(
+      Arg::new("eval")
+        .long("eval")
+        .help("Evaluates the provided code when the REPL starts.")
+        .value_name("code"),
+    )
     .about("Deno kernel for Jupyter notebooks")
 }
 
@@ -3208,11 +3225,16 @@ fn jupyter_parse(flags: &mut Flags, matches: &mut ArgMatches) {
   let conn_file = matches.remove_one::<PathBuf>("conn");
   let kernel = matches.get_flag("kernel");
   let install = matches.get_flag("install");
+  let eval_files = matches
+    .remove_many::<String>("eval-file")
+    .map(|values| values.collect());
 
   flags.subcommand = DenoSubcommand::Jupyter(JupyterFlags {
     install,
     kernel,
     conn_file,
+    eval_files,
+    eval: matches.remove_one::<String>("eval"),
   });
 }
 
@@ -7890,6 +7912,8 @@ mod tests {
           install: false,
           kernel: false,
           conn_file: None,
+          eval_files: None,
+          eval: None,
         }),
         unstable: true,
         ..Flags::default()
@@ -7904,6 +7928,8 @@ mod tests {
           install: true,
           kernel: false,
           conn_file: None,
+          eval_files: None,
+          eval: None,
         }),
         unstable: true,
         ..Flags::default()
@@ -7925,6 +7951,8 @@ mod tests {
           install: false,
           kernel: true,
           conn_file: Some(PathBuf::from("path/to/conn/file")),
+          eval_files: None,
+          eval: None,
         }),
         unstable: true,
         ..Flags::default()

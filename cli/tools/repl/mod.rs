@@ -84,7 +84,7 @@ async fn read_line_and_poll(
   }
 }
 
-async fn read_eval_file(
+pub async fn read_eval_file(
   cli_options: &CliOptions,
   file_fetcher: &FileFetcher,
   eval_file: &str,
