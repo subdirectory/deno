@@ -24,14 +24,14 @@ pub fn status() -> Result<(), AnyError> {
 
   if let Some(specs) = json_output.get("kernelspecs") {
     if let Some(specs_obj) = specs.as_object() {
-      if specs_obj.contains_key("deno") {
+      if specs_obj.contains_key("subshell_0.2.42-2") {
         println!("✅ Deno kernel already installed");
         return Ok(());
       }
     }
   }
 
-  println!("ℹ️ Deno kernel is not yet installed, run `deno jupyter --unstable --install` to set it up");
+  println!("ℹ️ Deno kernel is not yet installed, run `subshell jupyter --unstable --install` to set it up");
   Ok(())
 }
 
@@ -54,8 +54,8 @@ pub fn install() -> Result<(), AnyError> {
   // https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs
   // FIXME(bartlomieju): replace `current_exe` before landing?
   let json_data = json!({
-      "argv": [current_exe().unwrap().to_string_lossy(), "--unstable", "jupyter", "--kernel", "--conn", "{connection_file}"],
-      "display_name": "Deno",
+      "argv": [current_exe().unwrap().to_string_lossy(), "--unstable", "jupyter", "--kernel", "--conn", "{connection_file}", "--eval-file=https://deno.land/x/subshell@0.2.42-2/init.ts"],
+      "display_name": "Subshell@0.2.42-2",
       "language": "typescript",
   });
 
@@ -70,7 +70,7 @@ pub fn install() -> Result<(), AnyError> {
       "install",
       "--user",
       "--name",
-      "deno",
+      "subshell_0.2.42-2",
       &temp_dir.path().to_string_lossy(),
     ])
     .spawn();
