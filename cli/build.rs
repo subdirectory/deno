@@ -453,13 +453,13 @@ fn main() {
 
   #[cfg(target_os = "windows")]
   println!(
-    "cargo:rustc-link-arg-bin=deno=/DEF:{}",
+    "cargo:rustc-link-arg-bin=subshell=/DEF:{}",
     symbols_path.display()
   );
 
   #[cfg(target_os = "macos")]
   println!(
-    "cargo:rustc-link-arg-bin=deno=-Wl,-exported_symbols_list,{}",
+    "cargo:rustc-link-arg-bin=subshell=-Wl,-exported_symbols_list,{}",
     symbols_path.display()
   );
 
@@ -473,10 +473,10 @@ fn main() {
         .unwrap_or(false)
     {
       println!("cargo:warning=Compiling with all symbols exported, this will result in a larger binary. Please use glibc 2.35 or later for an optimised build.");
-      println!("cargo:rustc-link-arg-bin=deno=-rdynamic");
+      println!("cargo:rustc-link-arg-bin=subshell=-rdynamic");
     } else {
       println!(
-        "cargo:rustc-link-arg-bin=deno=-Wl,--export-dynamic-symbol-list={}",
+        "cargo:rustc-link-arg-bin=subshell=-Wl,--export-dynamic-symbol-list={}",
         symbols_path.display()
       );
     }

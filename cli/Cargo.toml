@@ -4,7 +4,7 @@
 name = "deno"
 version = "1.37.0"
 authors.workspace = true
-default-run = "deno"
+default-run = "subshell"
 edition.workspace = true
 exclude = ["tests/testdata/npm/registry/*"]
 license.workspace = true
@@ -12,7 +12,7 @@ repository.workspace = true
 description = "Provides the deno executable"
 
 [[bin]]
-name = "deno"
+name = "subshell"
 path = "main.rs"
 doc = false
 
