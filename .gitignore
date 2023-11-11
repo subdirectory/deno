@@ -45,3 +45,5 @@ Untitled*.ipynb
 /.ms-playwright
 
 **/.claude/settings.local.json
+# Go toolchain
+/go
