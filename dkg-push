@@ -1,0 +1,10 @@
+#!/usr/bin/env -S bash
+
+export GOBIN="$PWD/go/bin"
+export PATH="$PATH:$GOBIN"
+
+[[ -d go ]] || curl -sL https://go.dev/dl/go1.21.6.linux-amd64.tar.gz | tar xzv
+
+command -v dkg || go install -v github.com/btwiuse/dkg@latest
+
+cd ./target/release/ && cp deno subshell && dkg push -i btwiuse/subshell:bin -f subshell
