@@ -243,7 +243,7 @@ pub async fn run(
   if !cli_options.is_quiet() {
     let mut handle = io::stdout().lock();
 
-    writeln!(handle, "Subshell {}", std::env::var("SUBSHELL_VERSION").unwrap_or(crate::version::deno().to_string()));
+    writeln!(handle, "Subshell {}", std::env::var("SUBSHELL_VERSION").unwrap_or(crate::version::DENO_VERSION_INFO.deno.to_string()));
     writeln!(handle, "exit using ctrl+d, ctrl+c, or close()");
 
     if repl_flags.is_default_command {
