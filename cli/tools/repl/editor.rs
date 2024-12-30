@@ -27,6 +27,7 @@ use rustyline::ConditionalEventHandler;
 use rustyline::Config;
 use rustyline::Context;
 use rustyline::Editor;
+use rustyline::EditMode;
 use rustyline::Event;
 use rustyline::EventContext;
 use rustyline::EventHandler;
@@ -436,6 +437,7 @@ impl ReplEditor {
   ) -> Result<Self, AnyError> {
     let editor_config = Config::builder()
       .completion_type(CompletionType::List)
+      .edit_mode(EditMode::Vi)
       .build();
 
     let mut editor =
