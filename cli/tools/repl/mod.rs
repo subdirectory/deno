@@ -3,6 +3,8 @@
 use std::io;
 use std::io::Write;
 use std::sync::Arc;
+use std::fs;
+use std::path::PathBuf;
 
 use deno_core::error::AnyError;
 use deno_core::futures::StreamExt;
@@ -156,6 +158,44 @@ async fn read_eval_file(
   Ok(TextDecodedFile::decode(file)?.source)
 }
 
+async fn load_denorc_scripts(
+  cli_options: &CliOptions,
+  file_fetcher: &CliFileFetcher,
+  repl: &mut Repl,
+) -> Result<(), AnyError> {
+  let denorc_dir = dirs::home_dir().map(|p| p.join(".denorc"));
+  if let Some(denorc_dir) = denorc_dir {
+    if denorc_dir.exists() && denorc_dir.is_dir() {
+      let mut scripts: Vec<PathBuf> = fs::read_dir(denorc_dir)?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.is_file())
+        .collect();
+      scripts.sort();
+
+      for script in scripts {
+        let script_path = script.to_str().unwrap();
+        match read_eval_file(cli_options, file_fetcher, script_path).await {
+          Ok(eval_source) => {
+            let output = repl
+              .session
+              .evaluate_line_and_get_output(&eval_source)
+              .await;
+            // only output errors
+            if let EvaluationOutput::Error(error_text) = output {
+              println!("Error in .denorc file \"{script_path}\": {error_text}");
+            }
+          }
+          Err(e) => {
+            println!("Error in .denorc file \"{script_path}\": {e}");
+          }
+        }
+      }
+    }
+  }
+  Ok(())
+}
+
 #[allow(clippy::print_stdout)]
 pub async fn run(
   flags: Arc<Flags>,
@@ -210,9 +250,12 @@ pub async fn run(
     message_handler: rustyline_channel.1,
   };
 
+  // Load .denorc scripts
+  load_denorc_scripts(&cli_options, &file_fetcher, &mut repl).await?;
+
   if let Some(eval_files) = repl_flags.eval_files {
     for eval_file in eval_files {
-      match read_eval_file(cli_options, file_fetcher, &eval_file).await {
+      match read_eval_file(&cli_options, &file_fetcher, &eval_file).await {
         Ok(eval_source) => {
           let output = repl
             .session
