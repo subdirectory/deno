@@ -1648,6 +1648,7 @@ dependencies = [
  "deno_terminal 0.2.2",
  "deno_tower_lsp",
  "dhat",
+ "dirs",
  "dissimilar",
  "dotenvy",
  "dprint-core",
