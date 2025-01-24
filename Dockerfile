@@ -10,6 +10,8 @@ WORKDIR /app
 
 RUN cargo b -r
 
-RUN ufo pub .
+FROM btwiuse/ufo AS base
+
+COPY --from=builder /app/target/release/deno /usr/bin/deno
 
 CMD ufo term
